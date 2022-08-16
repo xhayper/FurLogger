@@ -1,7 +1,7 @@
 import { Guild, GuildAuditLogsEntry, GuildAuditLogsResolvable, PermissionFlagsBits } from "discord.js";
 import fs, { PathLike } from "node:fs";
 import path from "node:path";
-import { BotClient } from "./structure/BotClient";
+import { BotClient } from "./BotClient";
 
 export class Utility {
     client: BotClient;

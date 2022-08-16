@@ -1,3 +1,4 @@
+import { ActivityType } from "discord.js";
 import { BotClient } from "../structure/BotClient";
 import { TypedEvent } from "../structure/Event";
 
@@ -6,23 +7,39 @@ export default TypedEvent({
     once: async (client: BotClient<true>) => {
         client.logger.log(`Ready! Logged in as ${client.user.tag}!`);
 
-        // TODO: Figure out how to do this without causing a ratelimit
-        for (const oauthGuild of (await client.guilds.fetch()).values()) {
-            const guild = await client.guilds.fetch(oauthGuild.id);
+        client.user.setPresence({
+            status: "dnd",
+            afk: false,
+            activities: [
+                {
+                    type: ActivityType.Watching,
+                    name: "your server"
+                }
+            ]
+        });
 
-            if (!guild) continue;
+        const db = client.databaseClient.db("furlogger");
+        const guilds = await db.collection("guilds").find({}).toArray();
+        console.log(guilds);
 
-            for (const channel of (await guild.channels.fetch()).values()) {
-                if (!channel.isTextBased()) continue;
+        // TODO: See also [channelPinsUpdate.ts]
+        // // TODO: Figure out how to do this without causing a ratelimit
+        // for (const oauthGuild of (await client.guilds.fetch()).values()) {
+        //     const guild = await client.guilds.fetch(oauthGuild.id);
 
-                client.logger.debug(`Fetching pinned messages of "#${channel.name}" in "${guild.name}"...`);
+        //     if (!guild) continue;
 
-                const pinnedMessage = await client.cacheManager.fetchChannelPin(channel);
+        //     for (const channel of (await guild.channels.fetch()).values()) {
+        //         if (!channel.isTextBased()) continue;
 
-                client.logger.debug(
-                    `Found ${pinnedMessage.length} pinned message in "#${channel.name}" in "${guild.name}".`
-                );
-            }
-        }
+        //         client.logger.debug(`Fetching pinned messages of "#${channel.name}" in "${guild.name}"...`);
+
+        //         const pinnedMessage = await client.cacheManager.fetchChannelPin(channel);
+
+        //         client.logger.debug(
+        //             `Found ${pinnedMessage.length} pinned message in "#${channel.name}" in "${guild.name}".`
+        //         );
+        //     }
+        // }
     }
 });

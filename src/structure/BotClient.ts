@@ -7,17 +7,19 @@ import {
     GatewayIntentsString,
     Partials
 } from "discord.js";
-import { PrismaClient } from "@prisma/client";
+import { MongoClient, Logger } from "mongodb";
 import { Command } from "./Command";
 import { Event } from "./Event";
 import chalk from "chalk";
-import { CacheManager } from "../CacheManager";
-import { Utility } from "../Utility";
+import { CacheManager } from "./CacheManager";
+import { Utility } from "./Utility";
 
 const LOADABLE_EXTENSIONS = [".js", ".ts"];
 
 export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
-    databaseClient: PrismaClient = new PrismaClient();
+    databaseClient: MongoClient = new MongoClient(process.env.DATABASE_URL!, {
+        monitorCommands: true
+    });
 
     commandList: Collection<string, Command> = new Collection();
     eventList: Collection<string, Event> = new Collection();
@@ -63,6 +65,11 @@ export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
         });
 
         this.debug = options?.debug ?? false;
+
+        Logger.setLevel(this.debug ? "debug" : "info");
+        this.databaseClient.connect();
+
+        this.databaseClient.db("furlogger");
     }
 
     loadCommandIn(directoryPath: string) {
@@ -105,6 +112,10 @@ export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
 
         log: (...data: any[]) => {
             console.log(`[${chalk.greenBright("LOG")}] ${this.logger.getPrefix()}`, ...data);
+        },
+
+        info: (...data: any[]) => {
+            console.log(`[${chalk.greenBright("INFO")}] ${this.logger.getPrefix()}`, ...data);
         },
 
         error: (...data: any[]) => {
