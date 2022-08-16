@@ -14,7 +14,7 @@ export class Utility {
         guild: Guild,
         type: T
     ): Promise<GuildAuditLogsEntry<T> | undefined> {
-        if (!(await guild.members.fetchMe({ cache: true })).permissions.has(PermissionFlagsBits.ViewAuditLog)) return;
+        if (!guild.members.me?.permissions.has(PermissionFlagsBits.ViewAuditLog)) return;
 
         return (
             await guild.fetchAuditLogs({

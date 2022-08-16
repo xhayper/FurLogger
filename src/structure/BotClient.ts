@@ -7,9 +7,9 @@ import {
     GatewayIntentsString,
     Partials
 } from "discord.js";
-import { MongoClient, Logger } from "mongodb";
+import { MongoClient, Logger, Db } from "mongodb";
 import { Command } from "./Command";
-import { Event } from "./Event";
+import { AllowedLogEvent, Event } from "./Event";
 import chalk from "chalk";
 import { CacheManager } from "./CacheManager";
 import { Utility } from "./Utility";
@@ -17,9 +17,10 @@ import { Utility } from "./Utility";
 const LOADABLE_EXTENSIONS = [".js", ".ts"];
 
 export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
-    databaseClient: MongoClient = new MongoClient(process.env.DATABASE_URL!, {
+    mongoClient: MongoClient = new MongoClient(process.env.DATABASE_URL!, {
         monitorCommands: true
     });
+    database: Db;
 
     commandList: Collection<string, Command> = new Collection();
     eventList: Collection<string, Event> = new Collection();
@@ -67,9 +68,9 @@ export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
         this.debug = options?.debug ?? false;
 
         Logger.setLevel(this.debug ? "debug" : "info");
-        this.databaseClient.connect();
+        this.mongoClient.connect();
 
-        this.databaseClient.db("furlogger");
+        this.database = this.mongoClient.db("furlogger");
     }
 
     loadCommandIn(directoryPath: string) {

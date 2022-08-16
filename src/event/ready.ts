@@ -18,7 +18,7 @@ export default TypedEvent({
             ]
         });
 
-        const db = client.databaseClient.db("furlogger");
+        const db = client.mongoClient.db("furlogger");
         const guilds = await db.collection("guilds").find({}).toArray();
         console.log(guilds);
 
