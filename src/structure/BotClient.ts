@@ -9,16 +9,22 @@ import {
 } from "discord.js";
 import { PrismaClient } from "@prisma/client";
 import { Command } from "./Command";
-import { WalkPath } from "../Utility";
 import { Event } from "./Event";
 import chalk from "chalk";
+import { CacheManager } from "../CacheManager";
+import { Utility } from "../Utility";
 
 const LOADABLE_EXTENSIONS = [".js", ".ts"];
 
 export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
-    databaseClient: PrismaClient;
-    commandList: Collection<string, Command>;
-    eventList: Collection<string, Event>;
+    databaseClient: PrismaClient = new PrismaClient();
+
+    commandList: Collection<string, Command> = new Collection();
+    eventList: Collection<string, Event> = new Collection();
+
+    cacheManager = new CacheManager();
+    utility: Utility = new Utility(this);
+
     debug: boolean = false;
 
     constructor(
@@ -57,15 +63,10 @@ export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
         });
 
         this.debug = options?.debug ?? false;
-
-        this.databaseClient = new PrismaClient();
-
-        this.commandList = new Collection();
-        this.eventList = new Collection();
     }
 
     loadCommandIn(directoryPath: string) {
-        for (const file of WalkPath(directoryPath)) {
+        for (const file of this.utility.walkPath(directoryPath)) {
             if (!LOADABLE_EXTENSIONS.some((ext) => file.endsWith(ext))) continue;
 
             const commandInstance = require(file);
@@ -81,7 +82,7 @@ export class BotClient<Ready extends boolean = boolean> extends Client<Ready> {
     }
 
     loadEventIn(directoryPath: string) {
-        for (const file of WalkPath(directoryPath)) {
+        for (const file of this.utility.walkPath(directoryPath)) {
             if (!LOADABLE_EXTENSIONS.some((ext) => file.endsWith(ext))) continue;
 
             const event = require(file);
