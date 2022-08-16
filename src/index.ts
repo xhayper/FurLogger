@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { BotClient } from "./structures/BotClient";
+import { BotClient } from "./structure/BotClient";
 import path from "node:path";
 
 const client = new BotClient({

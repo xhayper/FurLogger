@@ -1,5 +1,5 @@
-import { BotClient } from "../structures/BotClient";
-import { TypedEvent } from "../structures/Event";
+import { BotClient } from "../structure/BotClient";
+import { TypedEvent } from "../structure/Event";
 
 export default TypedEvent({
     eventName: "debug",
