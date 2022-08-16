@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id          String        @id @map("_id")
+  eventConfig EventConfig[]
+}
+
+model EventConfig {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  eventName String  @unique
+  template  String
+  enabled   Boolean @default(false)
+
+  Guild   Guild?  @relation(fields: [guildId], references: [id])
+  guildId String?
+}
